@@ -398,19 +398,19 @@ void esp8266ArtNetRDM::_artPoll() {
   _artReplyBuffer[5] = 'e';
   _artReplyBuffer[6] = 't';
   _artReplyBuffer[7] = 0;
-  _artReplyBuffer[8] = ARTNET_ARTPOLL_REPLY;      	// op code lo-hi
-  _artReplyBuffer[9] = ARTNET_ARTPOLL_REPLY >> 8; 	// 0x2100 = artPollReply
-  _artReplyBuffer[10] = _art->deviceIP[0];        	// ip address
+  _artReplyBuffer[8] = ARTNET_ARTPOLL_REPLY & 0x00ff; 	// op code lo-hi
+  _artReplyBuffer[9] = ARTNET_ARTPOLL_REPLY >> 8; 		// 0x2100 = artPollReply
+  _artReplyBuffer[10] = _art->deviceIP[0];        		// ip address
   _artReplyBuffer[11] = _art->deviceIP[1];
   _artReplyBuffer[12] = _art->deviceIP[2];
   _artReplyBuffer[13] = _art->deviceIP[3];
-  _artReplyBuffer[14] = 0x36;               		// port lo first always 0x1936
+  _artReplyBuffer[14] = 0x36;               			// port lo first always 0x1936
   _artReplyBuffer[15] = 0x19;
   _artReplyBuffer[16] = _art->firmWareVersion >> 8;     // firmware hi-lo
   _artReplyBuffer[17] = _art->firmWareVersion;
   _artReplyBuffer[20] = _art->oemHi;                    // oem hi-lo
   _artReplyBuffer[21] = _art->oemLo;
-  _artReplyBuffer[22] = 0;              		// ubea
+  _artReplyBuffer[22] = 0;              				// ubea
 	
   _artReplyBuffer[23] = 0b11110010;			// Device is RDM Capable
   _artReplyBuffer[24] = _art->estaLo;           	// ESTA Code (2 bytes)
@@ -778,19 +778,19 @@ void esp8266ArtNetRDM::_artIPProgReply() {
   ipProgReply[5] = 'e';
   ipProgReply[6] = 't';
   ipProgReply[7] = 0;
-  ipProgReply[8] = ARTNET_IP_PROG_REPLY;      // op code lo-hi
-  ipProgReply[9] = ARTNET_IP_PROG_REPLY >> 8; // 0x2100 = artPollReply
+  ipProgReply[8] = ARTNET_IP_PROG_REPLY & 0x00ff;	// op code lo-hi
+  ipProgReply[9] = ARTNET_IP_PROG_REPLY >> 8; 		// 0x2100 = artPollReply
   ipProgReply[10] = 0;
-  ipProgReply[11] = 14;                 // artNet version (14)
+  ipProgReply[11] = 14;                 			// artNet version (14)
   ipProgReply[12] = 0;
   ipProgReply[13] = 0;
   ipProgReply[14] = 0;
   ipProgReply[15] = 0;
-  ipProgReply[16] = _art->deviceIP[0];  // ip address
+  ipProgReply[16] = _art->deviceIP[0];  			// ip address
   ipProgReply[17] = _art->deviceIP[1];
   ipProgReply[18] = _art->deviceIP[2];
   ipProgReply[19] = _art->deviceIP[3];
-  ipProgReply[20] = _art->subnet[0];    // subnet address
+  ipProgReply[20] = _art->subnet[0];    			// subnet address
   ipProgReply[21] = _art->subnet[1];
   ipProgReply[22] = _art->subnet[2];
   ipProgReply[23] = _art->subnet[3];
@@ -1035,19 +1035,19 @@ void esp8266ArtNetRDM::artTODData(uint8_t g, uint8_t p, uint16_t* uidMan, uint32
   artTodData[5] = 'e';
   artTodData[6] = 't';
   artTodData[7] = 0;
-  artTodData[8] = ARTNET_TOD_DATA;      // op code lo-hi
+  artTodData[8] = ARTNET_TOD_DATA & 0x00ff;   	// op code lo-hi
   artTodData[9] = ARTNET_TOD_DATA >> 8;
   artTodData[10] = 0;
-  artTodData[11] = 14;                 // artNet version (14)
-  artTodData[12] = 0x01;               // rdm standard Ver 1.0
-  artTodData[13] = p+1;                // port number (1-4 not 0-3)
+  artTodData[11] = 14;                 			// artNet version (14)
+  artTodData[12] = 0x01;               			// rdm standard Ver 1.0
+  artTodData[13] = p+1;                			// port number (1-4 not 0-3)
   artTodData[14] = 0;
   artTodData[15] = 0;
   artTodData[16] = 0;
   artTodData[17] = 0;
   artTodData[18] = 0;
   artTodData[19] = 0;
-  artTodData[20] = g+1;                // bind index
+  artTodData[20] = g+1;                			// bind index
   artTodData[21] = _art->group[g]->netSwitch;
 
   if (state == RDM_TOD_READY)
@@ -1170,7 +1170,7 @@ void esp8266ArtNetRDM::rdmResponse(rdm_data* c, uint8_t g, uint8_t p) {
   rdmReply[5] = 'e';
   rdmReply[6] = 't';
   rdmReply[7] = 0;
-  rdmReply[8] = ARTNET_RDM;          // op code lo-hi
+  rdmReply[8] = ARTNET_RDM & 0x00ff; // op code lo-hi
   rdmReply[9] = ARTNET_RDM >> 8;
   rdmReply[10] = 0;
   rdmReply[11] = 14;                 // artNet version (14)
@@ -1352,15 +1352,15 @@ void esp8266ArtNetRDM::sendDMX(uint8_t g, uint8_t p, IPAddress bcAddress, uint8_
   _artDMX[5] = 'e';
   _artDMX[6] = 't';
   _artDMX[7] = 0;
-  _artDMX[8] = ARTNET_ARTDMX;      	// op code lo-hi
+  _artDMX[8] = ARTNET_ARTDMX & 0x00ff;	// op code lo-hi
   _artDMX[9] = ARTNET_ARTDMX >> 8;	
-  _artDMX[10] = 0;  		   	// protocol version (14)
+  _artDMX[10] = 0;  		   			// protocol version (14)
   _artDMX[11] = 14;
-  _artDMX[12] = _dmxSeqID++;		// sequence ID
-  _artDMX[13] = p;		   	// Port ID (not really necessary)
+  _artDMX[12] = _dmxSeqID++;			// sequence ID
+  _artDMX[13] = p;		   				// Port ID (not really necessary)
   _artDMX[14] = (subnet << 4) | uni;	// Subuni
-  _artDMX[15] = (net & 0x7F);		// Netswitch
-  _artDMX[16] = (length >> 8);		// DMX Data length
+  _artDMX[15] = (net & 0x7F);			// Netswitch
+  _artDMX[16] = (length >> 8);			// DMX Data length
   _artDMX[17] = (length & 0xFF);
 
   for (uint16_t x = 0; x < length; x++)

@@ -14,7 +14,6 @@ If not, see http://www.gnu.org/licenses/
 */
 
 
-
 #ifndef espArtNetRDM_h
 #define espArtNetRDM_h
 
