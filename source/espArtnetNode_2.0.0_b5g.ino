@@ -118,7 +118,7 @@ uint32_t statusTimer = 0;
 
 esp8266ArtNetRDM artRDM;
 ESP8266WebServer webServer(80);
-DynamicJsonDocument jsonBuffer(1024);
+DynamicJsonBuffer jsonBuffer;
 ws2812Driver pixDriver;
 File fsUploadFile;
 bool statusLedsDim = true;
@@ -477,11 +477,7 @@ void ipHandle() {
     deviceSettings.subnet = artRDM.getSubnetMask();
     deviceSettings.gateway = deviceSettings.ip;
     deviceSettings.gateway[3] = 1;
-    deviceSettings.broadcast[0] = ~deviceSettings.subnet[0] | (deviceSettings.ip[0] & deviceSettings.subnet[0]);
-    deviceSettings.broadcast[1] = ~deviceSettings.subnet[1] | (deviceSettings.ip[1] & deviceSettings.subnet[1]);
-    deviceSettings.broadcast[2] = ~deviceSettings.subnet[2] | (deviceSettings.ip[2] & deviceSettings.subnet[2]); 
-    deviceSettings.broadcast[3] = ~deviceSettings.subnet[3] | (deviceSettings.ip[3] & deviceSettings.subnet[3]);
-   
+    deviceSettings.broadcast = {~deviceSettings.subnet[0] | (deviceSettings.ip[0] & deviceSettings.subnet[0]), ~deviceSettings.subnet[1] | (deviceSettings.ip[1] & deviceSettings.subnet[1]), ~deviceSettings.subnet[2] | (deviceSettings.ip[2] & deviceSettings.subnet[2]), ~deviceSettings.subnet[3] | (deviceSettings.ip[3] & deviceSettings.subnet[3])};
     deviceSettings.dhcpEnable = 0;
     
     doReboot = true;

@@ -14,9 +14,8 @@ If not, see http://www.gnu.org/licenses/
 */
 
 void ajaxHandle() {
-  DynamicJsonDocument json(1024);
-  DynamicJsonDocument jsonReply(12048);
-  DeserializationError error = deserializeJson(json, webServer.arg("plain"));
+  JsonObject& json = jsonBuffer.parseObject(webServer.arg("plain"));
+  JsonObject& jsonReply = jsonBuffer.createObject();
   
   String reply;
   
@@ -27,7 +26,7 @@ void ajaxHandle() {
     jsonReply["success"] = 1;
     jsonReply["doUpdate"] = 1;
     
-    serializeJson(jsonReply, reply);
+    jsonReply.printTo(reply);
     webServer.send(200, "application/json", reply);
 
     if (json["doUpdate"] == 1) {
@@ -43,8 +42,8 @@ void ajaxHandle() {
     
   // Handle load and save of data
   } else if (json.containsKey("success") && json["success"] == 1 && json.containsKey("page")) {
-    if (ajaxSave(json["page"].as<uint8_t>(), json)) {
-      ajaxLoad(json["page"].as<uint8_t>(), jsonReply);
+    if (ajaxSave((uint8_t)json["page"], json)) {
+      ajaxLoad((uint8_t)json["page"], jsonReply);
 
       if (json.size() > 2)
         jsonReply["message"] = "Settings Saved";
@@ -68,11 +67,11 @@ void ajaxHandle() {
   // Handle errors
   } 
 
-  serializeJson(jsonReply, reply);  
+  jsonReply.printTo(reply);
   webServer.send(200, "application/json", reply);
 }
 
-bool ajaxSave(uint8_t page, DynamicJsonDocument json) {
+bool ajaxSave(uint8_t page, JsonObject& json) {
   // This is a load request, not a save
   if (json.size() == 2)
     return true;
@@ -84,10 +83,10 @@ bool ajaxSave(uint8_t page, DynamicJsonDocument json) {
       break;
 
     case 2:     // Wifi
-      json["wifiSSID"].as<String>().toCharArray(deviceSettings.wifiSSID, 40);
-      json["wifiPass"].as<String>().toCharArray(deviceSettings.wifiPass, 40);
-      json["hotspotSSID"].as<String>().toCharArray(deviceSettings.hotspotSSID, 20);
-      json["hotspotPass"].as<String>().toCharArray(deviceSettings.hotspotPass, 20);
+      json.get<String>("wifiSSID").toCharArray(deviceSettings.wifiSSID, 40);
+      json.get<String>("wifiPass").toCharArray(deviceSettings.wifiPass, 40);
+      json.get<String>("hotspotSSID").toCharArray(deviceSettings.hotspotSSID, 20);
+      json.get<String>("hotspotPass").toCharArray(deviceSettings.hotspotPass, 20);
       deviceSettings.hotspotDelay = (uint8_t)json["hotspotDelay"];
       deviceSettings.standAloneEnable = (bool)json["standAloneEnable"];
 
@@ -99,12 +98,11 @@ bool ajaxSave(uint8_t page, DynamicJsonDocument json) {
       deviceSettings.ip = IPAddress(json["ipAddress"][0],json["ipAddress"][1],json["ipAddress"][2],json["ipAddress"][3]);
       deviceSettings.subnet = IPAddress(json["subAddress"][0],json["subAddress"][1],json["subAddress"][2],json["subAddress"][3]);
       deviceSettings.gateway = IPAddress(json["gwAddress"][0],json["gwAddress"][1],json["gwAddress"][2],json["gwAddress"][3]);
-      deviceSettings.broadcast = deviceSettings.ip | (~deviceSettings.subnet);
+      deviceSettings.broadcast = uint32_t(deviceSettings.ip) | (~uint32_t(deviceSettings.subnet));
       //deviceSettings.broadcast = {~deviceSettings.subnet[0] | (deviceSettings.ip[0] & deviceSettings.subnet[0]), ~deviceSettings.subnet[1] | (deviceSettings.ip[1] & deviceSettings.subnet[1]), ~deviceSettings.subnet[2] | (deviceSettings.ip[2] & deviceSettings.subnet[2]), ~deviceSettings.subnet[3] | (deviceSettings.ip[3] & deviceSettings.subnet[3])};
 
-      json["nodeName"].as<String>().toCharArray(deviceSettings.nodeName, 18);
-      json["longName"].as<String>().toCharArray(deviceSettings.longName, 64);
-
+      json.get<String>("nodeName").toCharArray(deviceSettings.nodeName, 18);
+      json.get<String>("longName").toCharArray(deviceSettings.longName, 64);
 
       if (!isHotspot && (bool)json["dhcpEnable"] != deviceSettings.dhcpEnable) {
         
@@ -505,18 +503,18 @@ bool ajaxSave(uint8_t page, DynamicJsonDocument json) {
   }
 }
 
-void ajaxLoad(uint8_t page, DynamicJsonDocument jsonReply) {
+void ajaxLoad(uint8_t page, JsonObject& jsonReply) {
 
   // Create the needed arrays here - doesn't work within the switch below
-  JsonArray ipAddress = jsonReply.createNestedArray("ipAddress");
-  JsonArray subAddress = jsonReply.createNestedArray("subAddress");
-  JsonArray gwAddress = jsonReply.createNestedArray("gwAddress");
-  JsonArray bcAddress = jsonReply.createNestedArray("bcAddress");
-  JsonArray portAuni = jsonReply.createNestedArray("portAuni");
-  JsonArray portBuni = jsonReply.createNestedArray("portBuni");
-  JsonArray portAsACNuni = jsonReply.createNestedArray("portAsACNuni");
-  JsonArray portBsACNuni = jsonReply.createNestedArray("portBsACNuni");
-  JsonArray dmxInBroadcast = jsonReply.createNestedArray("dmxInBroadcast");
+  JsonArray& ipAddress = jsonReply.createNestedArray("ipAddress");
+  JsonArray& subAddress = jsonReply.createNestedArray("subAddress");
+  JsonArray& gwAddress = jsonReply.createNestedArray("gwAddress");
+  JsonArray& bcAddress = jsonReply.createNestedArray("bcAddress");
+  JsonArray& portAuni = jsonReply.createNestedArray("portAuni");
+  JsonArray& portBuni = jsonReply.createNestedArray("portBuni");
+  JsonArray& portAsACNuni = jsonReply.createNestedArray("portAsACNuni");
+  JsonArray& portBsACNuni = jsonReply.createNestedArray("portBsACNuni");
+  JsonArray& dmxInBroadcast = jsonReply.createNestedArray("dmxInBroadcast");
 
   // Get MAC Address
   char MAC_char[30] = "";
